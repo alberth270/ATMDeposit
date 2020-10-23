@@ -1,9 +1,9 @@
 package com.everis.proyect.controller;
 
 import com.everis.proyect.models.AtmDeposit;
+import com.everis.proyect.models.AtmDepositRequest;
 import com.everis.proyect.service.AtmDepositService;
 import io.reactivex.Single;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,11 +30,10 @@ public class AtmDepositResponseController {
    */
 
   @PostMapping("/deposits/")
-  public Single<AtmDeposit> postAtmDeposit(@RequestBody String documentNumber) throws Exception {
-    JSONObject document = new JSONObject(documentNumber);
+  public Single<AtmDeposit> postAtmDeposit(@RequestBody AtmDepositRequest document) throws Exception {
     logger.info("Inicio proceso AtmDeposit");
     try {
-      return atmDepositService.business(document.getString("documentNumber"));
+      return atmDepositService.business(document.getDocumentNumber());
     } catch (Exception e) {
       logger.info(e.getMessage());
       return Single.just(new AtmDeposit(e.getMessage(), null, 0.00));

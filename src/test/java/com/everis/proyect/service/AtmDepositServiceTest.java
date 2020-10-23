@@ -1,5 +1,7 @@
 package com.everis.proyect.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import com.everis.proyect.models.Account;
@@ -27,7 +29,21 @@ public class AtmDepositServiceTest {
   @Mock
   private ApiService service;
 
-  
+  @Test
+  public void testitemnull() { // The test method does not have to be public in JUnit5
+    when(atmservice.responseperson("12345678"))
+        .thenReturn(new Persons(0L, "item is null", false, false));
+    Exception thrown = assertThrows(Exception.class, () -> atmservice.business("12345678"));
+    assertEquals("item is null", thrown.getMessage());
+}
+  @Test
+  public void testblacklist() { // The test method does not have to be public in JUnit5
+    when(atmservice.responseperson("12345678"))
+        .thenReturn(new Persons(1L, "12345678", false, true));
+    Exception thrown = assertThrows(Exception.class, () -> atmservice.business("12345678"));
+    assertEquals("Person en lista negra, no se pudo obtener data", thrown.getMessage());
+}
+
   @Test
   public void testbusinessif() throws Exception {
     /* FIGENGERPRINTS */
@@ -37,20 +53,19 @@ public class AtmDepositServiceTest {
     personexpect.setDocumento(personentrada.getDocumento());
     personexpect.setFingerprint(personentrada.isFingerprint());
     personexpect.setBlacklist(personentrada.isBlacklist());
-    when(atmservice.responseperson("12345678"))
-          .thenReturn(personentrada);
-    
+    when(atmservice.responseperson("12345678")).thenReturn(personentrada);
+
     Fingerprints fingerprints = new Fingerprints("Core", true);
     Fingerprints fingerprintssalida = new Fingerprints();
     fingerprintssalida.setEntityName(fingerprints.getEntityName());
     fingerprintssalida.setSuccess(fingerprints.isSuccess());
     when(service.findFingerprintByDocument("12345678")).thenReturn(fingerprintssalida);
-    
+
     Card card = new Card("1111222233334444", true);
     List<Card> listCard = new ArrayList<>();
     listCard.add(card);
     when(service.findCardsByDocument("12345678")).thenReturn(new Cards(listCard));
-    
+
     Account account = new Account("1111222233334444XXX", 500.00);
     List<Account> listaccounts = new ArrayList<>();
     listaccounts.add(account);
@@ -60,19 +75,19 @@ public class AtmDepositServiceTest {
 
     atmDeposit.assertSubscribed();
   }
-  
+
   @Test
   public void testbusinesselse() throws Exception {
     /* RENIEC */
     when(atmservice.responseperson("12345678"))
-          .thenReturn(new Persons(1L, "12345678", false, false));
-    
-    Reniec reniec =  new Reniec("Reniec", true);
+        .thenReturn(new Persons(1L, "12345678", false, false));
+
+    Reniec reniec = new Reniec("Reniec", true);
     Reniec reniecsalida = new Reniec();
     reniecsalida.setEntityName(reniec.getEntityName());
     reniecsalida.setSuccess(reniec.isSuccess());
     when(service.findReniecByDocument("12345678")).thenReturn(reniecsalida);
-    
+
     Card card = new Card("1111222233334444", true);
     Card cardsalida = new Card();
     cardsalida.setNumTarjeta(card.getNumTarjeta());
@@ -83,20 +98,20 @@ public class AtmDepositServiceTest {
     Cards cardssalida = new Cards();
     cardssalida.setCards(cards.getCards());
     when(service.findCardsByDocument("12345678")).thenReturn(cardssalida);
-    
+
     Account account = new Account("1111222233334444XXX", 500.00);
     Account accountsalida = new Account();
     accountsalida.setAccountNumber(account.getAccountNumber());
     accountsalida.setAmount(account.getAmount());
     List<Account> listaccount = new ArrayList<>();
     listaccount.add(account);
-    
+
     Accounts accounts = new Accounts(listaccount);
     Accounts accountssalida = new Accounts();
     accountssalida.setListAccount(accounts.getListAccount());
-    
+
     when(service.findAccountByCard("1111222233334444")).thenReturn(accountssalida);
-    
+
     TestObserver<AtmDeposit> atmDeposit = atmservice.business("12345678").test();
 
     atmDeposit.assertSubscribed();

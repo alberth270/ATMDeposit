@@ -42,7 +42,7 @@ public class ApiServiceTest {
     Persons person = service.findByDocument("12345678");
     
     assertEquals(true, person.isFingerprint());
-  }
+  }  
   
   @Test
   public void testFindReniecByDocument() throws Exception {
